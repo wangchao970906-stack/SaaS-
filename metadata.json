@@ -1,0 +1,7 @@
+{
+  "name": "Enterprise Management Platform",
+  "description": "A high-fidelity SaaS management platform featuring multi-tenancy, product contracting, RBAC, and financial settlement, designed with a minimalist business aesthetic.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
