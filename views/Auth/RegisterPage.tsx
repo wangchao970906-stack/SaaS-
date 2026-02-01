@@ -1,11 +1,42 @@
-
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Building, Users, ArrowRight, ChevronLeft } from 'lucide-react';
+import { authApi } from '../../api/auth';
+import { useAuth } from '../../context/AuthContext';
 
 const RegisterPage: React.FC = () => {
   const [step, setStep] = useState<'type' | 'info'>('type');
   const [regType, setRegType] = useState<'create' | 'join' | null>(null);
+
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: ''
+  });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (regType !== 'create') return; // 简化处理,仅实现创建流程
+
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await authApi.register(formData);
+      // 注册成功后自动登录
+      await login(formData.email, formData.password);
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || '注册失败');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
@@ -25,7 +56,7 @@ const RegisterPage: React.FC = () => {
               <p className="text-slate-500 mb-8 text-sm">选择最适合您现状的加入方式</p>
 
               <div className="space-y-4">
-                <button 
+                <button
                   onClick={() => { setRegType('create'); setStep('info'); }}
                   className="w-full flex items-center gap-4 p-5 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition-all text-left group"
                 >
@@ -39,7 +70,7 @@ const RegisterPage: React.FC = () => {
                   <ArrowRight size={18} className="text-slate-300 group-hover:text-blue-500" />
                 </button>
 
-                <button 
+                <button
                   onClick={() => { setRegType('join'); setStep('info'); }}
                   className="w-full flex items-center gap-4 p-5 rounded-2xl border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 transition-all text-left group"
                 >
@@ -62,7 +93,7 @@ const RegisterPage: React.FC = () => {
             </div>
           ) : (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <button 
+              <button
                 onClick={() => setStep('type')}
                 className="mb-6 flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-slate-600"
               >
@@ -76,9 +107,43 @@ const RegisterPage: React.FC = () => {
                 {regType === 'create' ? '请填写您的企业基本资料' : '通过管理员提供的 6 位代码快速加入'}
               </p>
 
-              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-6" onSubmit={handleRegister}>
                 {regType === 'create' ? (
                   <>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">工作邮箱</label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="常用的工作邮箱"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">登录密码</label>
+                      <input
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="设置登录密码 (至少6位)"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">姓名</label>
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="您的真实姓名"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                        required
+                      />
+                    </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2">企业全称</label>
                       <input type="text" placeholder="例如: 某某信息技术有限公司" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
@@ -97,15 +162,24 @@ const RegisterPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">邀请码</label>
                     <div className="grid grid-cols-6 gap-2">
-                       {[1,2,3,4,5,6].map(i => (
-                         <input key={i} type="text" maxLength={1} className="w-full h-12 text-center text-lg font-bold bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none uppercase" />
-                       ))}
+                      {[1, 2, 3, 4, 5, 6].map(i => (
+                        <input key={i} type="text" maxLength={1} className="w-full h-12 text-center text-lg font-bold bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none uppercase" />
+                      ))}
                     </div>
                   </div>
                 )}
 
-                <button className="w-full bg-[#0052CC] text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30">
-                  {regType === 'create' ? '立即创建' : '确认加入'}
+                {error && (
+                  <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-center gap-2">
+                    <span className="font-bold">错误:</span> {error}
+                  </div>
+                )}
+
+                <button
+                  disabled={isLoading}
+                  className="w-full bg-[#0052CC] text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? '处理中...' : (regType === 'create' ? '立即创建' : '确认加入')}
                 </button>
               </form>
             </div>

@@ -1,11 +1,12 @@
-
 import React, { useState } from 'react';
 import { Bell, Search, ChevronDown, User, LogOut, Check } from 'lucide-react';
 import { useApp } from '../App';
+import { useAuth } from '../context/AuthContext';
 import { Workspace } from '../types';
 
 const Topbar: React.FC = () => {
-  const { user, activeWorkspace, workspaces, setActiveWorkspace } = useApp();
+  const { activeWorkspace, workspaces, setActiveWorkspace } = useApp();
+  const { user, logout } = useAuth();
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -14,7 +15,7 @@ const Topbar: React.FC = () => {
       <div className="flex items-center gap-4">
         {/* Workspace Switcher */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200"
           >
@@ -64,9 +65,9 @@ const Topbar: React.FC = () => {
         {/* Global Search */}
         <div className="hidden sm:flex items-center relative mr-2">
           <Search className="absolute left-3 text-slate-400" size={16} />
-          <input 
-            type="text" 
-            placeholder="搜索功能或订单..." 
+          <input
+            type="text"
+            placeholder="搜索功能或订单..."
             className="pl-10 pr-4 py-1.5 bg-slate-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-[#0052CC] transition-all w-64"
           />
         </div>
@@ -79,7 +80,7 @@ const Topbar: React.FC = () => {
 
         {/* User Profile */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
             className="flex items-center gap-2 p-1 pl-2 rounded-full border border-slate-200 hover:border-slate-300 transition-colors bg-white shadow-sm"
           >
@@ -98,7 +99,10 @@ const Topbar: React.FC = () => {
                 <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">
                   <User size={16} /> 个人中心
                 </button>
-                <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                <button
+                  onClick={logout}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
                   <LogOut size={16} /> 退出登录
                 </button>
               </div>
